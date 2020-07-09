@@ -1,28 +1,29 @@
 ﻿using ApiExcel.Models;
 using ExcelDataReader;
-using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace ApiExcel.Utility
 {
-    public interface IFileExtension
+    public interface IFileExtension<T> where T : class
     {
-        IEnumerable<MapDatasetDataModel> ParseExcel(IFormFile files, bool Videos);
+        IEnumerable<object> ParseExcel(Stream files);
     }
-    public class FileExtension : IFileExtension
+    public class FileExtension<T> : IFileExtension<T> where T : class
     {
-
-        public IEnumerable<MapDatasetDataModel> ParseExcel(IFormFile files, bool Videos)
+        public IEnumerable<object> ParseExcel(Stream files)
         {
+            var data = typeof(T);
+
             using (MemoryStream ms = new MemoryStream())
             {
                 files.CopyTo(ms);
-                var fileBytes = ms.ToArray();
-                using (var reader = ExcelReaderFactory.CreateReader(files.OpenReadStream()))
+                var fileBytes = ms.ToArray(); Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                using (var reader = ExcelReaderFactory.CreateReader(files))
                 {
                     var result = reader.AsDataSet(new ExcelDataSetConfiguration()
                     {
@@ -32,30 +33,55 @@ namespace ApiExcel.Utility
                             UseHeaderRow = true,
                         }
                     });
-
-                    return MapDatasetData(result.Tables.Cast<DataTable>().ToList()[0], Videos);
-
+                    if (data == typeof(Genres))
+                    {
+                        return MapDatasetDataGenres(result.Tables.Cast<DataTable>().ToList()[0]);
+                    }
+                    else
+                    {
+                        return MapDatasetDataVideos(result.Tables.Cast<DataTable>().ToList()[0]);
+                    }
                 }
             }
         }
 
-        private IEnumerable<MapDatasetDataModel> MapDatasetData(DataTable dt, bool Videos)
+        private List<Genres> MapDatasetDataGenres(DataTable dt)
         {
-            //var x= dt.Rows..Cast<List<Videos>>().ToList();
-            var row = new List<MapDatasetDataModel>();
+            var row = new List<Genres>();
             foreach (DataRow dr in dt.Rows)
             {
-                var model = new MapDatasetDataModel();
-                model.Code = dr["کد"].ToString().Fa2En();
-                model.Name = dr["نام"].ToString();
-                model.Status = dr["وضعیت"].ToString();
-                model.Description = dr["توضیحات"].ToString();
-                model.LastUpdate = dr["اخرین تاریخ بروزرسانی"].ToString();
-                if (!Videos) //  اولیت داخل ژانر 
-                    model.Priority = dr["الویت"].ToString().Fa2En();
-                if (Videos) // زانر داخل فیلم
-                    model.Genre = dr["ژانر"].ToString().Fa2En().ToString();
-                model.HashRow = Md5Helper.Makebyte(dr);
+                var model = new Genres
+                {
+                    Code = dr["کد"].ToString().Fa2En(),
+                    Name = dr["نام"].ToString(),
+                    Status = dr["وضعیت"].ToString() == "فعال" ? true : false,
+                    Description = dr["توضیحات"].ToString(),
+                    LastUpdate = Convert.ToDateTime(dr["اخرین تاریخ بروزرسانی"]),
+                    Priority = dr["الویت"].ToString().Fa2En(),
+                    HashRow = null
+                };
+                model.HashRow = Md5Helper.Makebyte(model);
+                row.Add(model);
+            }
+            return row;
+        }
+
+        private List<Videos> MapDatasetDataVideos(DataTable dt)
+        {
+            var row = new List<Videos>();
+            foreach (DataRow dr in dt.Rows)
+            {
+                var model = new Videos
+                {
+                    Code = dr["کد"].ToString().Fa2En(),
+                    Name = dr["نام"].ToString(),
+                    Status = dr["وضعیت"].ToString() == "فعال" ? true : false,
+                    Description = dr["توضیحات"].ToString(),
+                    LastUpdate = Convert.ToDateTime(dr["اخرین تاریخ بروزرسانی"]),
+                    Genre = dr["ژانر"].ToString().Fa2En(),
+                    HashRow = null
+                };
+                model.HashRow = Md5Helper.Makebyte(model);
                 row.Add(model);
             }
             return row;

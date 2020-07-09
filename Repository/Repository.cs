@@ -1,19 +1,16 @@
-﻿using ApiExcel.Models;
-using ApiExcel.Utility;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace ApiExcel.Repository
 {
-    public interface IRepository<TEntity> where TEntity : class
+    public interface IRepositoryImpert<TEntity> where TEntity : class
     {
-        void AddOrUpdateAsync(IFormFile files, CancellationToken cancellationToken);
-        Task<List<Result>> GetAsync(CancellationToken cancellationToken);
-
+        Task AddOrUpdateAsync(Stream stream, CancellationToken cancellationToken = default);
+    }
+    public interface IRepositoryRead
+    {
+        object Get();
     }
 }
+

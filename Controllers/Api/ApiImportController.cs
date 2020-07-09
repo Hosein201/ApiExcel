@@ -2,7 +2,6 @@
 using ApiExcel.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,30 +11,27 @@ namespace ApiExcel.Controllers.Api
     [ApiController]
     public class ApiImportController : ControllerBase
     {
-        private readonly IRepository<Genres> _repositoryGenres;
-        private readonly IRepository<Videos> _repositoryVideos;
-        public ApiImportController(IRepository<Genres> repositoryGenres,
-            IRepository<Videos> repositoryVideos)
+        private readonly IRepositoryImpert<Genres> _repositoryGenres;
+        private readonly IRepositoryImpert<Videos> _repositoryVideos;
+        public ApiImportController(IRepositoryImpert<Genres> repositoryGenres,
+            IRepositoryImpert<Videos> repositoryVideos)
         {
-            this._repositoryGenres = repositoryGenres;
-            this._repositoryVideos = repositoryVideos;
+            _repositoryGenres = repositoryGenres;
+            _repositoryVideos = repositoryVideos;
         }
-        [HttpPost("UploadVideos")]
-        public async Task<IActionResult> UploadVideos(List<IFormFile> files, CancellationToken cancellationToken)
-        {
-            foreach (var file in files)
-                await Task.Run(() => _repositoryVideos.AddOrUpdateAsync(file, cancellationToken));
-            return Ok();
 
+        [HttpPost("UploadVideos")]
+        public async Task<IActionResult> UploadVideos(IFormFile file, CancellationToken cancellationToken)
+        {
+            await _repositoryVideos.AddOrUpdateAsync(file.OpenReadStream(), cancellationToken);
+            return Ok();
         }
 
         [HttpPost("UploadGenres")]
-        public async Task<IActionResult> UploadGenres(List<IFormFile> files, CancellationToken cancellationToken)
+        public async Task<IActionResult> UploadGenres(IFormFile file, CancellationToken cancellationToken)
         {
-            foreach (var file in files)
-                await Task.Run(() => _repositoryGenres.AddOrUpdateAsync(file, cancellationToken));
+            await _repositoryGenres.AddOrUpdateAsync(file.OpenReadStream(), cancellationToken);
             return Ok();
-
         }
     }
 }

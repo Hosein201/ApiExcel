@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using ApiExcel.Repository;
+using ApiExcel.Utility;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
-using ApiExcel.Models;
-using ApiExcel.Repository;
-using ApiExcel.Utility;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ApiExcel.Controllers.Api
 {
@@ -15,16 +10,16 @@ namespace ApiExcel.Controllers.Api
     [ApiController]
     public class ApiReadController : ControllerBase
     {
-        private readonly IRepository<Genres> _repositoryGenres;
-        public ApiReadController(IRepository<Genres> repositoryGenres)
+        private readonly IRepositoryRead iRepositoryRead;
+        public ApiReadController(IRepositoryRead _iRepositoryRead)
         {
-            this._repositoryGenres = repositoryGenres;
+            iRepositoryRead = _iRepositoryRead;
         }
         [HttpGet("Read")]
-        public async Task<IActionResult> Read(CancellationToken cancellationToken)
+        public IActionResult Read()
         {
-            
-            return Ok(_repositoryGenres.GetAsync(cancellationToken));
+            var data =  iRepositoryRead.Get();
+            return Ok(new ApiResult(true, data, "عملیات با موفیت انجام شد"));
         }
     }
 }

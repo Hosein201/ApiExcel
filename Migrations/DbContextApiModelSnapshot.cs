@@ -35,17 +35,18 @@ namespace ApiExcel.Migrations
                     b.Property<byte[]>("HashRow")
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<string>("LastUpdate")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("LastUpdate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
 
                     b.Property<int>("Priority")
                         .HasColumnType("int");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -71,29 +72,19 @@ namespace ApiExcel.Migrations
                     b.Property<byte[]>("HashRow")
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<string>("LastUpdate")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("LastUpdate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
 
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Genre");
-
                     b.ToTable("Videos");
-                });
-
-            modelBuilder.Entity("ApiExcel.Models.Videos", b =>
-                {
-                    b.HasOne("ApiExcel.Models.Genres", "Genres")
-                        .WithMany("Videos")
-                        .HasForeignKey("Genre")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

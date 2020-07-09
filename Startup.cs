@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Text;
 
 namespace ApiExcel
 {
@@ -22,17 +21,14 @@ namespace ApiExcel
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers(options => options.SuppressAsyncSuffixInActionNames = false)
-                             .AddNewtonsoftJson(option =>
-                   option.SerializerSettings.ReferenceLoopHandling =
-                   Newtonsoft.Json.ReferenceLoopHandling.Serialize);
+            services.AddControllers().AddNewtonsoftJson(option => option.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddDbContext<DbContextApi>(options =>
             {
                 options.UseSqlServer(@"Server=(localdb)\MSSQLLocalDB;Database=ImportExcel;Trusted_Connection=True;");
             });
-            services.AddScoped(typeof(IRepository<Genres>), typeof(GenresRepository));
-            services.AddScoped(typeof(IRepository<Videos>), typeof(VideosRepository));
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            services.AddTransient(typeof(IRepositoryImpert<Genres>),typeof(GenresRepository));
+            services.AddTransient(typeof(IRepositoryImpert<Videos>),typeof(VideosRepository));
+            services.AddTransient(typeof(IRepositoryRead), typeof(GenresRepository));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
